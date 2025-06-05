@@ -8,13 +8,14 @@ if (-not $ScriptRoot) {
 function Manage-ResourceIniFile {
     $ResourceIniPath = Join-Path -Path $ScriptRoot -ChildPath "Resource.ini"
     
+    # Adjusted to include an extra newline at the end
     $ExpectedIniContent = @"
 [SERVICE]
 RES=_ID_
 
 "@
 
-    Write-Host "Managing Resource.ini file at: ${ResourceIniPath}" # Fixed variable reference
+    Write-Host "Managing Resource.ini file at: ${ResourceIniPath}"
 
     if (Test-Path -Path $ResourceIniPath -PathType Leaf) {
         $CurrentContent = Get-Content -Path $ResourceIniPath -Raw -ErrorAction SilentlyContinue
@@ -23,7 +24,7 @@ RES=_ID_
             $FileAttributes = Get-ItemProperty -Path $ResourceIniPath -ErrorAction Stop
             $FileIsReadOnly = $FileAttributes.IsReadOnly
         } catch {
-            Write-Warning "Could not get attributes for ${ResourceIniPath}. Assuming it needs update. Error: $($_.Exception.Message)" # Fixed variable reference
+            Write-Warning "Could not get attributes for ${ResourceIniPath}. Assuming it needs update. Error: $($_.Exception.Message)"
         }
 
         if ($CurrentContent -eq $ExpectedIniContent -and $FileIsReadOnly) {
@@ -51,7 +52,8 @@ RES=_ID_
 
     try {
         Write-Host "Creating new Resource.ini file..."
-        Set-Content -Path $ResourceIniPath -Value $ExpectedIniContent -Encoding UTF8 -ErrorAction Stop
+        # -NoNewline ensures the written content exactly matches $ExpectedIniContent (which now includes the extra trailing newline)
+        Set-Content -Path $ResourceIniPath -Value $ExpectedIniContent -Encoding UTF8 -NoNewline -ErrorAction Stop 
         Write-Host "Resource.ini created successfully."
 
         Write-Host "Setting Resource.ini to read-only..."
@@ -87,17 +89,17 @@ try {
             $LocalVersionContent = Get-Content -Path $VersionFilePath -Raw
             if (-not [string]::IsNullOrWhiteSpace($LocalVersionContent)) {
                 $LocalVersion = [int]$LocalVersionContent
-                Write-Host "Found local version in ${VersionFilePath}: $LocalVersion" # Fixed variable reference
+                Write-Host "Found local version in ${VersionFilePath}: $LocalVersion"
             } else {
-                 Write-Warning "${VersionFilePath} is empty. Assuming local version 0." # Fixed variable reference
+                 Write-Warning "${VersionFilePath} is empty. Assuming local version 0."
                  $LocalVersion = 0
             }
         } catch {
-            Write-Warning "Could not parse version from ${VersionFilePath}. Assuming local version 0. Error: $($_.Exception.Message)" # Fixed variable reference
+            Write-Warning "Could not parse version from ${VersionFilePath}. Assuming local version 0. Error: $($_.Exception.Message)"
             $LocalVersion = 0
         }
     } else {
-        Write-Host "${VersionFilePath} not found. Will treat local version as 0." # Fixed variable reference
+        Write-Host "${VersionFilePath} not found. Will treat local version as 0."
         $LocalVersion = 0
     }
 
@@ -123,8 +125,8 @@ try {
         Invoke-WebRequest -Uri $downloadLink -OutFile $fullFilePath -ErrorAction Stop
         Write-Host "File downloaded and saved successfully."
 
-        Set-Content -Path $VersionFilePath -Value $CurrentRemoteVersion -Encoding UTF8 -ErrorAction Stop
-        Write-Host "Updated ${VersionFilePath} to version $CurrentRemoteVersion." # Fixed variable reference
+        Set-Content -Path $VersionFilePath -Value $CurrentRemoteVersion -Encoding UTF8 -NoNewline -ErrorAction Stop 
+        Write-Host "Updated ${VersionFilePath} to version $CurrentRemoteVersion."
     }
 }
 catch {
