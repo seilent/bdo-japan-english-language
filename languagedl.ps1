@@ -8,7 +8,6 @@ if (-not $ScriptRoot) {
 function Manage-ResourceIniFile {
     $ResourceIniPath = Join-Path -Path $ScriptRoot -ChildPath "Resource.ini"
     
-    # Adjusted to include an extra newline at the end
     $ExpectedIniContent = @"
 [SERVICE]
 RES=_ID_
@@ -51,9 +50,9 @@ RES=_ID_
     }
 
     try {
-        Write-Host "Creating new Resource.ini file..."
-        # -NoNewline ensures the written content exactly matches $ExpectedIniContent (which now includes the extra trailing newline)
-        Set-Content -Path $ResourceIniPath -Value $ExpectedIniContent -Encoding UTF8 -NoNewline -ErrorAction Stop 
+        Write-Host "Creating new Resource.ini file with ASCII encoding..."
+        # Changed encoding to ASCII for Resource.ini
+        Set-Content -Path $ResourceIniPath -Value $ExpectedIniContent -Encoding ASCII -NoNewline -ErrorAction Stop 
         Write-Host "Resource.ini created successfully."
 
         Write-Host "Setting Resource.ini to read-only..."
